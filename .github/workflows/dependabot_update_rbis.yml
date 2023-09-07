@@ -70,7 +70,7 @@ jobs:
           exit 1
       - name: Update gem RBIs
         run: |
-          ${{ inputs.tapioca_env_vars }} bin/tapioca gem
+          ${{ inputs.tapioca_env_vars }} bin/tapioca gem --workers=1
       - name: Check for modified files
         id: git_modified_files_check
         # If there are changes in the sorbet directory, `echo -n` will return true (zero exit code)
