@@ -1,8 +1,7 @@
 name: Update gem RBIs on Dependabot PRs
 
 on:
-  workflow_dispatch: null
-  workflow_call:
+  workflow_dispatch:
     inputs:
       dependency_setup_command:
         description: A bash script that sets up manually-required dependencies
@@ -17,9 +16,20 @@ on:
         type: string
         default: '["dependabot[bot]"]'
         required: false
-
-    secrets:
-      BUNDLER_GITHUB_TOKEN:
+  workflow_call:
+    inputs:
+      dependency_setup_command:
+        description: A bash script that sets up manually-required dependencies
+        type: string
+        required: false
+      tapioca_env_vars:
+        description: A space-delimited list of environment variables and their values, to be passed to the `tapioca gem` command
+        type: string
+        required: false
+      valid_actors:
+        description: A stringified list of GitHub actors that can trigger this job
+        type: string
+        default: '["dependabot[bot]"]'
         required: false
 
 permissions:
