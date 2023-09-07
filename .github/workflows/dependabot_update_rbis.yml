@@ -61,7 +61,7 @@ jobs:
         id: setup
         with:
           bundler-cache: true
-          ruby-version: ${{ steps.ruby.outputs.version }}
+          ruby-version: 3.2
       - name: Ruby setup error details
         if: ${{ failure() && steps.setup.conclusion == 'failure' }}
         run: |
