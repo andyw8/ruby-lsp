@@ -24,3 +24,5 @@ group :development do
   gem "rdoc", require: false
   gem "psych", "~> 5.1", require: false
 end
+
+gem "webrick", "~> 1.8"
