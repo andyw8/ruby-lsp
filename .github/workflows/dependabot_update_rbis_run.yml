@@ -3,4 +3,4 @@ on: [pull_request]
 
 jobs:
   dependabot_update_rbis:
-    uses: Shopify/ruby-lsp/.github/workflows/dependabot_update_rbis.yml@main
+    uses: andyw8/ruby-lsp/.github/workflows/dependabot_update_rbis.yml@main
