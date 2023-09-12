@@ -36,7 +36,7 @@ jobs:
         id: setup
         with:
           bundler-cache: true
-          ruby-version: ${{ steps.ruby.outputs.version }}
+          ruby-version: ${{ steps.ruby.outputs.ruby_version }}
       - name: Update gem RBIs
         run: |
           bin/tapioca gem
