@@ -31,6 +31,7 @@ jobs:
             &.dig("ruby")
             .then {|c| Hash === c ? c["version"] : c }
           exit 1 unless ruby_version
+          puts "got ruby_version #{ruby_version} from dev.yml"
           File.write(ENV.fetch("GITHUB_OUTPUT"), "ruby_version=#{ruby_version}\n", mode: "a")
       - uses: ruby/setup-ruby@v1
         id: setup
