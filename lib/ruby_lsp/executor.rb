@@ -389,6 +389,8 @@ module RubyLsp
 
     sig { params(uri: URI::Generic).returns(T.nilable(Interface::FullDocumentDiagnosticReport)) }
     def diagnostic(uri)
+      return if @store.formatter == "none"
+
       # Do not compute diagnostics for files outside of the workspace. For example, if someone is looking at a gem's
       # source code, we don't want to show diagnostics for it
       path = uri.to_standardized_path
