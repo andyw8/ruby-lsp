@@ -432,7 +432,26 @@ module RubyLsp
       params = message[:params]
       text_document = params[:textDocument]
 
+      uri = URI(params.dig(:textDocument, :uri))
+
+      document = @store.get(uri)
+      parse_result = document.parse_result
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
+      dispatcher = Prism::Dispatcher.new
+
       @global_state.synchronize do
+        send_log_message("Document changed, will be re-indexed: #{uri}")
+
+        @global_state.index.handle_change(uri) do |index|
+          index.delete(uri, skip_require_paths_tree: true)
+          RubyIndexer::DeclarationListener.new(index, dispatcher, parse_result, uri, collect_comments: true)
+          dispatcher.dispatch(parse_result.value)
+        end
         @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
       end
     end
