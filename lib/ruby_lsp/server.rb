@@ -1081,7 +1081,7 @@ module RubyLsp
           content = File.read(file_path)
           # We only handle changes on file watched notifications if the client is not the one managing this URI.
           # Otherwise, these changes are handled when running the combined requests
-          index.handle_change(uri, content) unless @store.key?(uri)
+          index.handle_change(uri, content)
         when Constant::FileChangeType::DELETED
           index.delete(uri)
         end
