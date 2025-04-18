@@ -12,7 +12,7 @@ module RubyLsp
       def initialize(response_builder, hints_configuration, dispatcher)
         @response_builder = response_builder
         @hints_configuration = hints_configuration
-        @current_visibility = "public" # Default method visibility in Ruby
+        @visibility_stack = [RubyIndexer::VisibilityScope.public_scope] #: Array[RubyIndexer::VisibilityScope]
 
         dispatcher.register(
           self,
@@ -20,6 +20,7 @@ module RubyLsp
           :on_implicit_node_enter,
           :on_def_node_enter,
           :on_call_node_enter,
+          :on_call_node_leave,
         )
       end
 
@@ -69,10 +70,38 @@ module RubyLsp
       #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         # Track visibility method calls (private, protected, public)
-        return unless node.name == "private" || node.name == "protected" || node.name == "public"
-        return if node.arguments&.arguments&.any? # Skip if this is a method call with arguments
+        name = node.name.to_s
+        return unless name == "private" || name == "protected" || name == "public"
 
-        @current_visibility = node.name
+        visibility = case name
+        when "public"    then "x1" # RubyIndexer::Entry::Visibility::PUBLIC
+        when "protected" then RubyIndexer::Entry::Visibility::PROTECTED
+        when "private"   then RubyIndexer::Entry::Visibility::PRIVATE
+        else
+          RubyIndexer::Entry::Visibility::PUBLIC # Default case, shouldn't happen
+        end
+
+        # If there are arguments, it's specifying methods to change, not entering a visibility context
+        if node.arguments&.arguments&.any?
+          # No change to visibility stack needed for specific method visibility changes
+          return
+        end
+
+        # No arguments means we're entering a new visibility context
+        @visibility_stack.push(RubyIndexer::VisibilityScope.new(visibility: visibility))
+      end
+
+      #: (Prism::CallNode node) -> void
+      def on_call_node_leave(node)
+        # Pop visibility stack when leaving a visibility modifier section
+        name = node.name.to_s
+        return unless name == "private" || name == "protected" || name == "public"
+
+        # If there are arguments and the first is a def node, we need to pop
+        # e.g., `private def foo; end`
+        if node.arguments&.arguments&.first&.is_a?(Prism::DefNode)
+          @visibility_stack.pop
+        end
       end
 
       #: (Prism::DefNode node) -> void
@@ -81,13 +110,22 @@ module RubyLsp
 
         loc = node.location
         method_name = node.name
+        current_visibility = current_visibility_scope.visibility.to_s.downcase
 
         @response_builder << Interface::InlayHint.new(
           position: { line: loc.start_line - 1, character: loc.start_column },
-          label: @current_visibility,
+          label: current_visibility,
           padding_right: true,
-          tooltip: "Method visibility: #{@current_visibility}",
+          tooltip: "Method visibility: #{current_visibility}",
         )
+      end
+
+      private
+
+      #: -> RubyIndexer::VisibilityScope
+      def current_visibility_scope
+        # T.must ensures the stack is never empty
+        T.must(@visibility_stack.last)
       end
     end
   end
