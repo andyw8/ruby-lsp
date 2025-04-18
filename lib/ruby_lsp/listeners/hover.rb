@@ -11,6 +11,7 @@ module RubyLsp
         Prism::ConstantReadNode,
         Prism::ConstantWriteNode,
         Prism::ConstantPathNode,
+        Prism::DefNode,
         Prism::GlobalVariableAndWriteNode,
         Prism::GlobalVariableOperatorWriteNode,
         Prism::GlobalVariableOrWriteNode,
@@ -58,6 +59,7 @@ module RubyLsp
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
           :on_call_node_enter,
+          :on_def_node_enter,
           :on_global_variable_and_write_node_enter,
           :on_global_variable_operator_write_node_enter,
           :on_global_variable_or_write_node_enter,
@@ -239,6 +241,36 @@ module RubyLsp
       #: (Prism::ClassVariableWriteNode node) -> void
       def on_class_variable_write_node_enter(node)
         handle_class_variable_hover(node.name.to_s)
+      end
+
+      #: (Prism::DefNode node) -> void
+      def on_def_node_enter(node)
+        # Only handle hovers on the def keyword itself
+        keyword_loc = node.def_keyword_loc
+        target_loc = @node_context.node&.location
+        return unless target_loc && keyword_loc.start_offset == target_loc.start_offset
+
+        method_name = node.name.to_s
+
+        # Use the fully qualified name from the node context
+        fully_qualified_name = @node_context.fully_qualified_name
+        return if fully_qualified_name.empty?
+
+        # Check if this is a singleton method
+        if node.receiver.is_a?(Prism::SelfNode)
+          # If the receiver is self, we need to get the singleton class
+          fully_qualified_name = "#{fully_qualified_name}.singleton_class"
+        end
+
+        # Look up the method in the index to get its visibility
+        methods = @index.resolve_method(method_name, fully_qualified_name)
+        return unless methods && !methods.empty?
+
+        method_entry = methods.first
+        return unless method_entry
+
+        visibility = method_entry.visibility.serialize.to_s
+        @response_builder.push("**Visibility**: #{visibility}", category: :documentation)
       end
 
       private
