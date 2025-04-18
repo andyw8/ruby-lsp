@@ -1,0 +1,32 @@
+{
+  "source": "class Example\n  def public_method\n    puts 'public'\n  end\n\n  private\n\n  def private_method\n    puts 'private'\n  end\n\n  protected\n\n  def protected_method\n    puts 'protected'\n  end\nend\n",
+  "expectations": [
+    {
+      "position": {
+        "line": 1,
+        "character": 2
+      },
+      "label": "public",
+      "padding_right": true,
+      "tooltip": "Method visibility: public"
+    },
+    {
+      "position": {
+        "line": 7,
+        "character": 2
+      },
+      "label": "private",
+      "padding_right": true,
+      "tooltip": "Method visibility: private"
+    },
+    {
+      "position": {
+        "line": 13,
+        "character": 2
+      },
+      "label": "protected",
+      "padding_right": true,
+      "tooltip": "Method visibility: protected"
+    }
+  ]
+}

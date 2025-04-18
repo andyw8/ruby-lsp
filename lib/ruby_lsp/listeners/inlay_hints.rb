@@ -12,13 +12,20 @@ module RubyLsp
       def initialize(response_builder, hints_configuration, dispatcher)
         @response_builder = response_builder
         @hints_configuration = hints_configuration
+        @current_visibility = "public" # Default method visibility in Ruby
 
-        dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter, :on_def_node_enter)
+        dispatcher.register(
+          self,
+          :on_rescue_node_enter,
+          :on_implicit_node_enter,
+          :on_def_node_enter,
+          :on_call_node_enter,
+        )
       end
 
       #: (Prism::RescueNode node) -> void
       def on_rescue_node_enter(node)
-        # return unless @hints_configuration.enabled?(:implicitRescue)
+        return unless @hints_configuration.enabled?(:implicitRescue)
         return unless node.exceptions.empty?
 
         loc = node.location
@@ -33,7 +40,7 @@ module RubyLsp
 
       #: (Prism::ImplicitNode node) -> void
       def on_implicit_node_enter(node)
-        # return unless @hints_configuration.enabled?(:implicitHashValue)
+        return unless @hints_configuration.enabled?(:implicitHashValue)
 
         node_value = node.value
         loc = node.location
@@ -59,6 +66,15 @@ module RubyLsp
         )
       end
 
+      #: (Prism::CallNode node) -> void
+      def on_call_node_enter(node)
+        # Track visibility method calls (private, protected, public)
+        return unless node.name == "private" || node.name == "protected" || node.name == "public"
+        return if node.arguments&.arguments&.any? # Skip if this is a method call with arguments
+
+        @current_visibility = node.name
+      end
+
       #: (Prism::DefNode node) -> void
       def on_def_node_enter(node)
         # return unless @hints_configuration.enabled?(:methodDefinition)
@@ -68,9 +84,9 @@ module RubyLsp
 
         @response_builder << Interface::InlayHint.new(
           position: { line: loc.start_line - 1, character: loc.start_column },
-          label: "hello",
+          label: @current_visibility,
           padding_right: true,
-          tooltip: "Method definition: #{method_name}",
+          tooltip: "Method visibility: #{@current_visibility}",
         )
       end
     end
