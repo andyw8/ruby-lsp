@@ -110,7 +110,7 @@ module RubyLsp
 
         loc = node.location
         method_name = node.name
-        current_visibility = current_visibility_scope.visibility.to_s.downcase
+        current_visibility = current_visibility_scope.visibility.serialize.to_s
 
         @response_builder << Interface::InlayHint.new(
           position: { line: loc.start_line - 1, character: loc.start_column },
