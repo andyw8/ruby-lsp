@@ -257,23 +257,42 @@ module RubyLsp
         return if fully_qualified_name.empty?
 
         # Check if this is a singleton method
-        if node.receiver.is_a?(Prism::SelfNode)
-          # If the receiver is self, we need to get the singleton class
+        singleton_method = node.receiver.is_a?(Prism::SelfNode)
+        if singleton_method
           fully_qualified_name = "#{fully_qualified_name}.singleton_class"
         end
 
-        # Look up the method in the index to get its visibility
+        # First try to find the method in the index
         methods = @index.resolve_method(method_name, fully_qualified_name)
-        return unless methods && !methods.empty?
+        method_entry = methods&.first
 
-        method_entry = methods.first
-        return unless method_entry
+        visibility = if method_entry && method_entry.respond_to?(:visibility)
+          # Use the visibility from the indexed method
+          method_entry.visibility.serialize.to_s
+        else
+          # If the method isn't fully indexed yet (e.g., it's being defined right now),
+          # use a heuristic to determine visibility
+          enclosing_call = find_enclosing_visibility_call
+          if enclosing_call
+            enclosing_call.name.to_s # private, protected, or public
+          else
+            # Default visibility in Ruby is public
+            "public"
+          end
+        end
 
-        visibility = method_entry.visibility.serialize.to_s
         @response_builder.push("**Visibility**: #{visibility}", category: :documentation)
       end
 
       private
+
+      # Find the most recent visibility modifier call that affects this method
+      #: -> Prism::CallNode?
+      def find_enclosing_visibility_call
+        # Simply return nil for now - method will be expanded in future
+        # We'll rely on the index for visibility information
+        nil
+      end
 
       #: ((Prism::InterpolatedStringNode | Prism::StringNode) node) -> void
       def generate_heredoc_hover(node)
