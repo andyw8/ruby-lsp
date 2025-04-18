@@ -13,7 +13,7 @@ module RubyLsp
         @response_builder = response_builder
         @hints_configuration = hints_configuration
 
-        dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter)
+        dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter, :on_def_node_enter)
       end
 
       #: (Prism::RescueNode node) -> void
@@ -56,6 +56,21 @@ module RubyLsp
           label: node_name,
           padding_left: true,
           tooltip: tooltip,
+        )
+      end
+
+      #: (Prism::DefNode node) -> void
+      def on_def_node_enter(node)
+        # return unless @hints_configuration.enabled?(:methodDefinition)
+
+        loc = node.location
+        method_name = node.name
+
+        @response_builder << Interface::InlayHint.new(
+          position: { line: loc.start_line - 1, character: loc.start_column + "def".length + 1 },
+          label: "hello",
+          padding_left: true,
+          tooltip: "Method definition: #{method_name}",
         )
       end
     end

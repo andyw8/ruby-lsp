@@ -13,7 +13,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: true })
+    hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: true, methodDefinition: true })
     request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     range = params.first
@@ -50,7 +50,21 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     RUBY
 
     dispatcher = Prism::Dispatcher.new
-    hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: false, implicitHashValue: true })
+    hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: false, implicitHashValue: true, methodDefinition: true })
+    request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
+    dispatcher.dispatch(document.parse_result.value)
+    assert_empty(request.perform)
+  end
+
+  def test_skip_method_definition
+    uri = URI("file://foo.rb")
+    document = RubyLsp::RubyDocument.new(uri: uri, source: <<~RUBY, version: 1, global_state: @global_state)
+      def example_method
+      end
+    RUBY
+
+    dispatcher = Prism::Dispatcher.new
+    hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: true, methodDefinition: false })
     request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     assert_empty(request.perform)

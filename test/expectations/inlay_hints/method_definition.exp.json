@@ -1,0 +1,14 @@
+{
+  "source": "def example_method\n  puts 'Hello'\nend\n",
+  "expectations": [
+    {
+      "position": {
+        "line": 0,
+        "character": 4
+      },
+      "label": "hello",
+      "padding_left": true,
+      "tooltip": "Method definition: example_method"
+    }
+  ]
+}
