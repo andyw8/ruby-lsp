@@ -18,7 +18,7 @@ module RubyLsp
 
       #: (Prism::RescueNode node) -> void
       def on_rescue_node_enter(node)
-        return unless @hints_configuration.enabled?(:implicitRescue)
+        # return unless @hints_configuration.enabled?(:implicitRescue)
         return unless node.exceptions.empty?
 
         loc = node.location
@@ -33,7 +33,7 @@ module RubyLsp
 
       #: (Prism::ImplicitNode node) -> void
       def on_implicit_node_enter(node)
-        return unless @hints_configuration.enabled?(:implicitHashValue)
+        # return unless @hints_configuration.enabled?(:implicitHashValue)
 
         node_value = node.value
         loc = node.location
@@ -67,9 +67,9 @@ module RubyLsp
         method_name = node.name
 
         @response_builder << Interface::InlayHint.new(
-          position: { line: loc.start_line - 1, character: loc.start_column + "def".length + 1 },
+          position: { line: loc.start_line - 1, character: loc.start_column },
           label: "hello",
-          padding_left: true,
+          padding_right: true,
           tooltip: "Method definition: #{method_name}",
         )
       end

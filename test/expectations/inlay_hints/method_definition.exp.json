@@ -4,10 +4,10 @@
     {
       "position": {
         "line": 0,
-        "character": 4
+        "character": 0
       },
       "label": "hello",
-      "padding_left": true,
+      "padding_right": true,
       "tooltip": "Method definition: example_method"
     }
   ]
