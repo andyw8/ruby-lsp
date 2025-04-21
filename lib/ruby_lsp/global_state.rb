@@ -163,6 +163,9 @@ module RubyLsp
       end
       @index.configuration.encoding = @encoding
 
+      # puts "cap:"
+      # puts JSON.pretty_generate(options[:capabilities])
+
       @client_capabilities.apply_client_capabilities(options[:capabilities]) if options[:capabilities]
 
       addon_settings = options.dig(:initializationOptions, :addonSettings)

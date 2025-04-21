@@ -13,6 +13,19 @@ module RubyLsp
       case message[:method]
       when "initialize"
         send_log_message("Initializing Ruby LSP v#{VERSION} https://github.com/Shopify/ruby-lsp/releases/tag/v#{VERSION}....")
+        # puts "***"
+        # puts message
+        # puts JSON.pretty_generate(message)
+        capabilities = message.fetch(:params).fetch(:capabilities)
+        codelens = !!capabilities.fetch(:textDocument).key?(:codeLens)
+        td = capabilities.fetch(:textDocument)
+        document_symbol = !!capabilities.fetch(:textDocument).key?(:documentSymbol)
+        document_link = !!capabilities.fetch(:textDocument).key?(:documentLink)
+        folding_range = !!capabilities.fetch(:textDocument).key?(:foldingRange)
+        use_combined_requests = [codelens, document_symbol, document_link, folding_range].any?
+        send_log_message("***" + [codelens, document_symbol, document_link, folding_range].inspect)
+        send_log_message("***use_combined_requests: #{use_combined_requests}")
+        send_log_message(capabilities.fetch(:textDocument).inspect)
         run_initialize(message)
       when "initialized"
         send_log_message("Finished initializing Ruby LSP!") unless @test_mode
