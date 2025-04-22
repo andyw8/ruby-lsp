@@ -17,7 +17,7 @@ module RubyLsp
         # puts message
         # puts JSON.pretty_generate(message)
         capabilities = message.fetch(:params).fetch(:capabilities)
-        codelens = !!capabilities.fetch(:textDocument).key?(:codeLens)
+        codelens = !!capabilities.fetch(:textDocument).dig(:codeLens, :dynamicRegistration)
         td = capabilities.fetch(:textDocument)
         document_symbol = !!capabilities.fetch(:textDocument).key?(:documentSymbol)
         document_link = !!capabilities.fetch(:textDocument).key?(:documentLink)
