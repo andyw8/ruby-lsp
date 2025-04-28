@@ -1,3 +1,12 @@
+GIT
+  remote: https://github.com/joeldrapper/aye_var.git
+  revision: 4bc9b8da878597a740fbf406a0f3a4cb447745cc
+  branch: main
+  specs:
+    aye_var (0.1.1)
+      prism
+      require-hooks
+
 PATH
   remote: .
   specs:
@@ -65,6 +74,7 @@ GEM
     regexp_parser (2.10.0)
     reline (0.6.0)
       io-console (~> 0.5)
+    require-hooks (0.2.2)
     rubocop (1.72.0)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -137,12 +147,11 @@ GEM
 
 PLATFORMS
   arm64-darwin
-  x64-mingw-ucrt
-  x64-mingw32
   x86_64-darwin
   x86_64-linux
 
 DEPENDENCIES
+  aye_var!
   bundler (~> 2.5)
   debug (~> 1.9)
   minitest (~> 5.25)

@@ -1,6 +1,9 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "aye_var"
+AyeVar.init(include: ["#{Dir.pwd}/**/*"])
+
 require "sorbet-runtime"
 
 ENV["RUBY_LSP_ENV"] = "test"

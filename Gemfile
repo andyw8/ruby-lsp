@@ -9,6 +9,7 @@ gem "minitest", "~> 5.25"
 gem "test-unit", require: false
 
 group :development do
+  gem "aye_var", github: "joeldrapper/aye_var", branch: "main"
   gem "debug", "~> 1.9", require: false
   gem "minitest-reporters", "~> 1.7"
   gem "mocha", "~> 2.3"
