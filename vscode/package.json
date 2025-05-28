@@ -788,7 +788,7 @@
     "ws": ">= 7.4.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.27.1",
+    "@babel/core": "^7.27.3",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.27.0",
     "@shopify/eslint-plugin": "^48.0.2",
@@ -802,9 +802,9 @@
     "@typescript-eslint/parser": "^7.18.0",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.4.2",
-    "esbuild": "^0.25.4",
+    "esbuild": "^0.25.5",
     "eslint": "^8.57.0",
-    "eslint-import-resolver-typescript": "^4.4.0",
+    "eslint-import-resolver-typescript": "^4.4.1",
     "eslint-plugin-prettier": "^5.4.0",
     "glob": "^11.0.2",
     "mocha": "^11.5.0",
