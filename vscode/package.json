@@ -818,7 +818,7 @@
     "eslint-plugin-prettier": "^5.4.1",
     "glob": "^11.0.2",
     "mocha": "^11.5.0",
-    "ovsx": "^0.10.3",
+    "ovsx": "^0.10.4",
     "prettier": "^3.5.3",
     "sinon": "^20.0.0",
     "typescript": "^5.8.3",
