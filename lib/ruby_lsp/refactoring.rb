@@ -23,6 +23,7 @@ module RubyLsp
       EOS
       response = client.responses.create(
         model: :"gpt-4.1",
+        temperature: 0,
         input: [
           { role: "user", content: content },
         ],
