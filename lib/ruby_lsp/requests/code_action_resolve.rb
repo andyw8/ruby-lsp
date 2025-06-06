@@ -37,6 +37,8 @@ module RubyLsp
           refactor_method
         when CodeActions::TOGGLE_BLOCK_STYLE_TITLE
           switch_block_style
+        when CodeActions::SIMPLIFY_CONDITIONAL_TITLE
+          simplify_conditional
         when CodeActions::CREATE_ATTRIBUTE_READER,
              CodeActions::CREATE_ATTRIBUTE_WRITER,
              CodeActions::CREATE_ATTRIBUTE_ACCESSOR
@@ -82,6 +84,45 @@ module RubyLsp
                   Interface::TextEdit.new(
                     range: range_from_location(node.location),
                     new_text: recursively_switch_nested_block_styles(node, indentation),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        )
+      end
+
+      #: -> (Interface::CodeAction)
+      def simplify_conditional
+        source_range = @code_action.dig(:data, :range)
+        raise EmptySelectionError, "Invalid selection for refactor" if source_range[:start] == source_range[:end]
+
+        start_index, end_index = @document.find_index_by_position(source_range[:start], source_range[:end])
+        selected_text = @document.source[start_index...end_index]
+        new_text = RubyLsp::Refactoring.new.simplify_conditional(selected_text).fetch("code")
+
+        Interface::CodeAction.new(
+          title: CodeActions::SIMPLIFY_CONDITIONAL_TITLE,
+          edit: Interface::WorkspaceEdit.new(
+            document_changes: [
+              Interface::TextDocumentEdit.new(
+                text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
+                  uri: @code_action.dig(:data, :uri),
+                  version: nil,
+                ),
+                edits: [
+                  Interface::TextEdit.new(
+                    range: Interface::Range.new(
+                      start: Interface::Position.new(
+                        line: source_range[:start][:line],
+                        character: source_range[:start][:character],
+                      ),
+                      end: Interface::Position.new(
+                        line: source_range[:end][:line],
+                        character: source_range[:end][:character],
+                      ),
+                    ),
+                    new_text: new_text,
                   ),
                 ],
               ),

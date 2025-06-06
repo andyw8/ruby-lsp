@@ -49,6 +49,7 @@ require "ruby_lsp/erb_document"
 require "ruby_lsp/rbs_document"
 require "ruby_lsp/store"
 require "ruby_lsp/addon"
+require "ruby_lsp/refactoring"
 
 # Response builders
 require "ruby_lsp/response_builders/response_builder"

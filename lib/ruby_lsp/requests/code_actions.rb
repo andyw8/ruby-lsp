@@ -10,6 +10,7 @@ module RubyLsp
       EXTRACT_TO_VARIABLE_TITLE = "Refactor: Extract Variable"
       EXTRACT_TO_METHOD_TITLE = "Refactor: Extract Method"
       TOGGLE_BLOCK_STYLE_TITLE = "Refactor: Toggle block style"
+      SIMPLIFY_CONDITIONAL_TITLE = "Refactor: Simplify Conditional"
       CREATE_ATTRIBUTE_READER = "Create Attribute Reader"
       CREATE_ATTRIBUTE_WRITER = "Create Attribute Writer"
       CREATE_ATTRIBUTE_ACCESSOR = "Create Attribute Accessor"
@@ -65,6 +66,11 @@ module RubyLsp
           )
           code_actions << Interface::CodeAction.new(
             title: TOGGLE_BLOCK_STYLE_TITLE,
+            kind: Constant::CodeActionKind::REFACTOR_REWRITE,
+            data: { range: @range, uri: @uri.to_s },
+          )
+          code_actions << Interface::CodeAction.new(
+            title: SIMPLIFY_CONDITIONAL_TITLE,
             kind: Constant::CodeActionKind::REFACTOR_REWRITE,
             data: { range: @range, uri: @uri.to_s },
           )

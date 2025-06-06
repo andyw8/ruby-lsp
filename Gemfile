@@ -25,4 +25,7 @@ group :development do
     gem "sorbet-static-and-runtime"
     gem "tapioca", "~> 0.16", require: false
   end
+
+  gem "openai"
+  gem "dotenv"
 end

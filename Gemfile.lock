@@ -2,7 +2,9 @@ PATH
   remote: .
   specs:
     ruby-lsp (0.24.0)
+      dotenv
       language_server-protocol (~> 3.17.0)
+      openai (>= 0.6.0)
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 5)
       sorbet-runtime (>= 0.5.10782)
@@ -12,10 +14,12 @@ GEM
   specs:
     ast (2.4.2)
     benchmark (0.4.1)
+    connection_pool (2.5.3)
     date (3.4.1)
     debug (1.10.0)
       irb (~> 1.10)
       reline (>= 0.3.8)
+    dotenv (3.1.8)
     erubi (1.13.1)
     io-console (0.8.0)
     irb (1.15.2)
@@ -30,6 +34,8 @@ GEM
     mocha (2.7.1)
       ruby2_keywords (>= 0.0.5)
     netrc (0.11.0)
+    openai (0.6.0)
+      connection_pool
     parallel (1.27.0)
     parser (3.3.7.1)
       ast (~> 2.4.1)
@@ -135,8 +141,10 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 2.5)
   debug (~> 1.9)
+  dotenv
   minitest (~> 5.25)
   mocha (~> 2.3)
+  openai
   psych (~> 5.1)
   rake (~> 13.2)
   rubocop (~> 1.70)
