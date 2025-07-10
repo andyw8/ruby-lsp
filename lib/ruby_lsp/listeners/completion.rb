@@ -178,6 +178,8 @@ module RubyLsp
           complete_require(node)
         when "require_relative"
           complete_require_relative(node)
+        when "gem"
+          complete_gem_path(node) if gemfile?
         else
           complete_methods(node, name)
         end
@@ -469,6 +471,55 @@ module RubyLsp
       rescue Errno::EPERM
         # If the user writes a relative require pointing to a path that the editor has no permissions to read, then glob
         # might fail with EPERM
+      end
+
+      #: (Prism::CallNode node) -> void
+      def complete_gem_path(node)
+        arguments_node = node.arguments
+        return unless arguments_node
+
+        # Find the path: keyword argument
+        path_node_to_complete = nil
+        arguments_node.arguments.each do |arg|
+          next unless arg.is_a?(Prism::KeywordHashNode)
+
+          arg.elements.each do |element|
+            next unless element.is_a?(Prism::AssocNode) &&
+              element.key.is_a?(Prism::SymbolNode) &&
+              element.key.value == :path &&
+              element.value.is_a?(Prism::StringNode)
+
+            path_node_to_complete = element.value
+            break
+          end
+        end
+
+        return unless path_node_to_complete
+
+        origin_dir = Pathname.new(@uri.to_standardized_path).dirname
+        content = path_node_to_complete.content
+
+        # Handle both directory and file completion like require_relative
+        path_query = "#{content}*"
+
+        Dir.glob(path_query, File::FNM_PATHNAME, base: origin_dir).sort!.each do |path|
+          full_path = origin_dir / path
+          # Only show directories and gemspec files for gem paths
+          next unless File.directory?(full_path) || path.end_with?(".gemspec")
+
+          @response_builder << build_completion(
+            path,
+            path_node_to_complete,
+          )
+        end
+      rescue Errno::EPERM
+        # If the user writes a gem path pointing to a path that the editor has no permissions to read, then glob
+        # might fail with EPERM
+      end
+
+      #: () -> bool
+      def gemfile?
+        @path && File.basename(@path) == RubyLsp::GEMFILE_NAME
       end
 
       #: (Prism::CallNode node, String name) -> void

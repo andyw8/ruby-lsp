@@ -1856,4 +1856,109 @@ class CompletionTest < Minitest::Test
       end
     end
   end
+
+  def test_gem_path_completion_in_gemfile
+    source = <<~RUBY
+      gem "my_gem", path: "lib/"
+    RUBY
+
+    start_char = source.index('lib/') #: as !nil
+    end_char = start_char + 4
+    start_position = { line: 0, character: start_char }
+    end_position = { line: 0, character: end_char }
+
+    with_server(source) do |server|
+      with_file_structure(server) do |tmpdir|
+        # Create a directory structure with gem-like directories
+        Dir.mkdir("#{tmpdir}/lib")
+        Dir.mkdir("#{tmpdir}/lib/my_gem")
+        File.write("#{tmpdir}/my_gem.gemspec", "# gemspec")
+
+        uri = URI("file://#{tmpdir}/Gemfile")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+              languageId: "ruby",
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        result = server.pop_response.response
+        labels = result.map(&:label)
+
+        assert_includes(labels, "lib")
+        # Only directories and .gemspec files should be included
+        assert_includes(labels, "my_gem.gemspec")
+      end
+    end
+  end
+
+  def test_gem_path_completion_with_partial_path
+    source = <<~RUBY
+      gem "rails", path: "../rai"
+    RUBY
+
+    start_char = source.index('../rai') #: as !nil
+    end_char = start_char + 7
+    start_position = { line: 0, character: start_char }
+    end_position = { line: 0, character: end_char }
+
+    with_server(source) do |server|
+      with_file_structure(server) do |tmpdir|
+        # Create a rails directory in the parent directory
+        parent_dir = File.dirname(tmpdir)
+        Dir.mkdir("#{parent_dir}/rails") unless Dir.exist?("#{parent_dir}/rails")
+
+        uri = URI("file://#{tmpdir}/Gemfile")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+              languageId: "ruby",
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        result = server.pop_response.response
+        labels = result.map(&:label)
+
+        assert_includes(labels, "../rails")
+      end
+    end
+  end
+
+  def test_gem_path_completion_only_in_gemfile
+    source = <<~RUBY
+      gem "my_gem", path: "lib/"
+    RUBY
+
+    with_server(source) do |server, uri|
+      # This is not a Gemfile, so gem path completion should not trigger
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 0, character: 22 },
+      })
+
+      result = server.pop_response.response
+      # Should not provide path completions since this is not a Gemfile
+      assert_empty(result)
+    end
+  end
 end
